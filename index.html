@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>托育服务人员培训考核 · 在线考试</title>
+<link rel="icon" href="data:,">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--main:#2f7d6e;--main2:#3d9c88;--bg:#f4f6f5;--line:#e4e9e7;--txt:#1f2a28;--sub:#6d7b77;--warn:#d9534f;--ok:#2f7d6e}
+body{margin:0;background:var(--bg);color:var(--txt);font-size:16px;line-height:1.6;
+ font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:16px 14px 90px}
+.card{background:#fff;border-radius:14px;padding:18px 16px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:14px}
+h1{font-size:20px;margin:0 0 6px}h2{font-size:17px;margin:0 0 10px}
+.muted{color:var(--sub);font-size:14px}
+.btn{display:block;width:100%;padding:14px;border:0;border-radius:12px;background:var(--main);color:#fff;
+ font-size:17px;font-weight:600;margin-top:12px;cursor:pointer}
+.btn:active{opacity:.85}
+.btn.ghost{background:#fff;color:var(--main);border:1.5px solid var(--main)}
+.btn.gray{background:#eef1f0;color:#485550}
+.row{display:flex;gap:10px}.row>*{flex:1}
+label{display:block;font-size:14px;color:var(--sub);margin:14px 0 6px}
+select,input{width:100%;padding:11px 10px;border:1px solid var(--line);border-radius:10px;font-size:16px;background:#fff;color:var(--txt)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 14px;border:1px solid var(--line);border-radius:20px;font-size:14px;background:#fff;cursor:pointer;color:var(--sub)}
+.chip.on{background:var(--main);color:#fff;border-color:var(--main)}
+.top{position:sticky;top:0;z-index:20;background:rgba(244,246,245,.96);backdrop-filter:blur(6px);
+ padding:10px 0 8px;margin:-16px -14px 12px;padding-left:14px;padding-right:14px;border-bottom:1px solid var(--line)}
+.bar{height:5px;background:#e3e8e6;border-radius:4px;overflow:hidden;margin-top:8px}
+.bar>i{display:block;height:100%;background:var(--main2);width:0;transition:width .25s}
+.meta{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--sub)}
+.timer{font-weight:700;color:var(--main);font-variant-numeric:tabular-nums}
+.timer.low{color:var(--warn)}
+.qnum{font-size:13px;color:var(--sub);margin-bottom:6px}
+.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:6px;background:#eaf3f1;color:var(--main);margin-right:6px}
+.tag.m{background:#fdf0e6;color:#c96a17}.tag.t{background:#eef0fb;color:#4a56b8}
+.stem{font-size:17px;margin:4px 0 14px;word-break:break-word}
+.opt{border:1.5px solid var(--line);border-radius:12px;padding:12px 13px;margin-bottom:10px;display:flex;gap:10px;cursor:pointer;background:#fff}
+.opt.sel{border-color:var(--main);background:#f2faf8}
+.opt .k{width:24px;height:24px;flex:0 0 24px;border-radius:50%;background:#eef1f0;color:#485550;
+ display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.opt.sel .k{background:var(--main);color:#fff}
+.opt .v{flex:1;word-break:break-word}
+.nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;z-index:30}
+.nav .btn{margin:0}
+.grid{display:flex;flex-wrap:wrap;gap:8px}
+.gd{width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--sub);
+ font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.gd.done{background:var(--main);color:#fff;border-color:var(--main)}
+.gd.cur{outline:2px solid #c96a17;outline-offset:1px}
+.big{text-align:center;padding:10px 0}
+.score{font-size:52px;font-weight:800;color:var(--main);line-height:1.1}
+.verdict{display:inline-block;padding:5px 16px;border-radius:20px;font-weight:700;font-size:15px;margin-top:6px}
+.pass{background:#e7f5f1;color:var(--ok)}.fail{background:#fdecea;color:var(--warn)}
+.stat{display:flex;text-align:center;margin:14px 0}
+.stat>div{flex:1}.stat b{display:block;font-size:19px}
+.ana{border-left:3px solid var(--main);background:#f7faf9;padding:9px 11px;border-radius:0 8px 8px 0;font-size:14px;color:#3c4a47;margin-top:8px;word-break:break-word}
+.ana.wrong{border-color:var(--warn)}
+.qr{text-align:center;padding:6px 0}
+.qr img,.qr canvas{max-width:100%;width:230px;height:230px}
+.warnbox{background:#fff8e7;border:1px solid #f3dfb0;border-radius:10px;padding:10px 12px;font-size:14px;color:#7a5b18}
+ul.tips{margin:8px 0 0;padding-left:20px;font-size:14px;color:var(--sub)}
+ul.tips li{margin:4px 0}
+.center{text-align:center}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--sub);word-break:break-all}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+/* ======= 考试配置（可改） ======= */
+var CFG={
+  title:'托育服务人员培训考核',
+  passScore:80,            // 合格线
+  durationMin:60,          // 时限（分钟）
+  counts:{single:70,multi:20,tf:10},
+  score:{single:1,multi:1.2,tf:0.6},   // 70×1 + 20×1.2 + 10×0.6 = 100 分
+  pool:'ALL',              // ALL=全库随机；或 'A'/'B'/'C'/'D' 抽某一组（4组互不相同）
+  showResult:true,         // 交卷后是否显示分数与解析
+  shuffleOpt:false         // 是否打乱选项顺序
+};
+/* =============================== */
+var BANK=null,STATE=null;
+function $(s){if(typeof document==='undefined'||!document.querySelector)return {innerHTML:'',style:{},textContent:'',onclick:null,classList:{add(){},remove(){}},dataset:{},appendChild(){},toDataURL(){return''}};return document.querySelector(s)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function pick(arr,n){return shuffle(arr.slice()).slice(0,n)}
+function isMobile(){return /Android|iPhone|iPad|iPod|MicroMessenger/i.test(navigator.userAgent)}
+function seed(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+
+/* ---------- 首页 ---------- */
+function home(denied){
+  var p=CFG.counts, tot=p.single*CFG.score.single+p.multi*CFG.score.multi+p.tf*CFG.score.tf;
+  var html=''
+  +'<div class="card">'
+  +'<h1>'+esc(CFG.title)+'</h1>'
+  +'<div class="muted">每次扫码从 3000 题大库中<b>现场随机抽题</b>，人人不同卷；交卷即时判分并显示解析。</div>'
+  +'<div class="stat">'
+  +'<div><b>'+(p.single+p.multi+p.tf)+'</b><span class="muted">总题数</span></div>'
+  +'<div><b>'+tot+'</b><span class="muted">总分</span></div>'
+  +'<div><b>'+CFG.durationMin+'</b><span class="muted">分钟</span></div>'
+  +'<div><b>'+CFG.passScore+'</b><span class="muted">合格线</span></div>'
+  +'</div>'
+  +'<label>试卷组成（固定配比，题目随机）</label>'
+  +'<div class="chips">'
+  +'<span class="chip on">单选 '+p.single+' 题</span><span class="chip on">多选 '+p.multi+' 题</span><span class="chip on">判断 '+p.tf+' 题</span>'
+  +'</div>'
+  +(CFG.pool==='ALL'?'<div class="warnbox" style="margin-top:12px">题源：全部 3000 题随机抽取，重复扫码可反复练，每次都不一样。</div>'
+   :'<div class="warnbox" style="margin-top:12px">题源：本场限定题库分组 <b>'+esc(CFG.pool)+'</b>（约 750 题）。</div>')
+  +(denied?'<div class="warnbox" style="margin-top:12px;border-color:#f0c2bf;background:#fdecea;color:#a33">本机上一场考试尚未交卷，已按作废处理，请勿中途退出答题页。</div>':'')
+  +'</div>'
+  +'<div class="card">'
+  +'<h2>考试须知</h2>'
+  +'<ul class="tips">'
+  +'<li>全程匿名，不采集姓名手机号；仅在本机记录本次成绩。</li>'
+  +'<li>多选题少选、多选、错选均不得分。</li>'
+  +'<li>倒计时结束自动交卷；中途退出或切走页面，本场按作废处理。</li>'
+  +'<li>建议使用微信或手机浏览器扫码作答，保持网络畅通。</li>'
+  +'</ul>'
+  +'<button class="btn" id="start">开始考试（随机抽题）</button>'
+  +'<button class="btn ghost" id="resume">继续上次未完成的考试</button>'
+  +'</div>'
+  +'<div class="card center"><div class="muted">组织者入口 · 生成现场考试二维码</div>'
+  +'<button class="btn gray" id="admin">我是组织者</button></div>';
+  $('#app').innerHTML=html;
+  $('#start').onclick=function(){newExam()};
+  $('#admin').onclick=function(){admin()};
+  var saved=loadDraft();
+  if(!saved){$('#resume').style.display='none'}
+  else{$('#resume').onclick=function(){STATE=saved;render()}}
+}
+function loadDraft(){
+  try{var raw=localStorage.getItem('ty_exam');if(!raw)return null;
+    var s=JSON.parse(raw);
+    if(s&&s.ends&&s.ends>Date.now()+CFG.durationMin*60000+60000)return null;
+    return s}catch(e){return null}
+}
+function saveDraft(){try{localStorage.setItem('ty_exam',JSON.stringify(STATE))}catch(e){}}
+
+/* ---------- 抽题组卷 ---------- */
+function newExam(){
+  var src=function(k){return CFG.pool==='ALL'?BANK[k]:BANK[k].filter(function(q){return q.g===CFG.pool})};
+  var qs=[];
+  pick(src('single'),CFG.counts.single).forEach(function(q){qs.push({t:'single',q:q,ans:[]})});
+  pick(src('multi'),CFG.counts.multi).forEach(function(q){qs.push({t:'multi',q:q,ans:[]})});
+  pick(src('tf'),CFG.counts.tf).forEach(function(q){qs.push({t:'tf',q:q,ans:[]})});
+  STATE={id:seed(),qs:qs,i:0,start:Date.now(),ends:Date.now()+CFG.durationMin*60000,done:false,submitted:false};
+  saveDraft();render();
+}
+
+/* ---------- 答题页 ---------- */
+function render(){
+  var s=STATE,q=s.qs[s.i],left=s.ends-Date.now();
+  if(left<=0){return submit(true)}
+  var doneN=s.qs.filter(function(x){return x.ans.length}).length;
+  var h='<div class="top"><div class="meta">'
+   +'<span>第 '+(s.i+1)+' / '+s.qs.length+' 题</span>'
+   +'<span class="timer" id="tm">'+fmt(left)+'</span>'
+   +'<span>已答 '+doneN+'</span></div>'
+   +'<div class="bar"><i style="width:'+((s.i+1)/s.qs.length*100)+'%"></i></div></div>';
+  h+='<div class="card"><div class="qnum">'+esc(q.q.c)+' · '+({single:'单选题',multi:'多选题',tf:'判断题'}[q.t])+'</div>'
+   +'<div class="stem">'+esc(q.q.s)+'</div>';
+  var opts=q.t==='tf'?['正确','错误']:q.q.o;
+  opts.forEach(function(o,k){
+    var on=q.ans.indexOf(k)>=0;
+    h+='<div class="opt'+(on?' sel':'')+'" data-k="'+k+'"><div class="k">'+'ABCD'[k]+'</div><div class="v">'+esc(o)+'</div></div>';
+  });
+  if(q.t==='multi')h+='<div class="muted" style="margin-top:8px">本题为多选，至少选 2 项</div>';
+  h+='</div>';
+  h+='<div class="card"><div class="muted" style="margin-bottom:8px">答题卡（点击跳转）</div><div class="grid" id="gd">';
+  s.qs.forEach(function(x,k){h+='<div class="gd'+(x.ans.length?' done':'')+(k===s.i?' cur':'')+'" data-j="'+k+'">'+(k+1)+'</div>'});
+  h+='</div></div>';
+  h+='<div class="nav"><button class="btn gray" id="prev" style="flex:1">上一题</button>'
+   +(s.i===s.qs.length-1?'<button class="btn" id="fin" style="flex:2">交卷</button>'
+   :'<button class="btn" id="next" style="flex:2">下一题</button>')+'</div>';
+  $('#app').innerHTML=h;
+  Array.prototype.forEach.call((typeof document!=='undefined'&&document.querySelectorAll?document.querySelectorAll('.opt'):[]),function(el){
+    el.onclick=function(){
+      var k=+el.dataset.k;
+      if(q.t==='multi'){var p=q.ans.indexOf(k);if(p>=0)q.ans.splice(p,1);else q.ans.push(k)}
+      else{q.ans=[k]}
+      saveDraft();render();
+    }});
+  Array.prototype.forEach.call((typeof document!=='undefined'&&document.querySelectorAll?document.querySelectorAll('.gd'):[]),function(el){el.onclick=function(){s.i=+el.dataset.j;saveDraft();render()}});
+  if($('#prev'))$('#prev').onclick=function(){if(s.i>0){s.i--;saveDraft();render()}};
+  if($('#next'))$('#next').onclick=function(){if(s.i<s.qs.length-1){s.i++;saveDraft();render()}};
+  if($('#fin'))$('#fin').onclick=function(){
+    var un=s.qs.map(function(x,k){return x.ans.length?0:k+1}).filter(Boolean);
+    if(un.length&&!confirm('还有 '+un.length+' 题未作答（第 '+un.slice(0,12).join('、')+(un.length>12?'…':'')+' 题），确定交卷？'))return;
+    submit(false);
+  };
+  if(typeof window!=='undefined'&&window.document&&window.document.querySelector&&window.document.querySelector('#tm')) tick();
+}
+function fmt(ms){var s=Math.max(0,Math.floor(ms/1000));return ('0'+Math.floor(s/60)).slice(-2)+':'+('0'+(s%60)).slice(-2)}
+var TIMER=null;
+function tick(){
+  clearInterval(TIMER);
+  TIMER=setInterval(function(){
+    var left=STATE.ends-Date.now(),el=$('#tm');
+    if(!el){clearInterval(TIMER);return}
+    el.textContent=fmt(left);
+    if(left<=0){clearInterval(TIMER);submit(true)}
+    else if(left<300000)el.className='timer low';
+  },1000);
+}
+
+/* ---------- 判分与成绩 ---------- */
+function judge(x){
+  var a=x.q.a.slice().sort().join(','),u=x.ans.slice().sort().join(',');
+  return u!==''&&a===u;
+}
+function submit(auto){
+  clearInterval(TIMER);
+  var s=STATE;if(s.submitted)return;s.submitted=true;s.done=true;s.submitTime=Date.now();
+  var sc=0,det=s.qs.map(function(x){var ok=judge(x);if(ok)sc+=CFG.score[x.t];return {ok:ok}});
+  s.score=sc;
+  s.full=s.qs.reduce(function(a,x){return a+CFG.score[x.t]},0);
+  s.pass=sc>=CFG.passScore;
+  s.auto=!!auto;
+  try{localStorage.setItem('ty_exam',JSON.stringify(s));var h=loadHistory();h.push({id:s.id,t:s.submitTime,score:sc,full:s.full,pass:s.pass});localStorage.setItem('ty_hist',JSON.stringify(h.slice(-50)))}catch(e){}
+  result();
+}
+function loadHistory(){try{return JSON.parse(localStorage.getItem('ty_hist')||'[]')}catch(e){return[]}}
+
+function result(){
+  var s=STATE;
+  var h='<div class="card"><div class="big">'
+   +(s.auto?'<div class="warnbox">倒计时结束，已自动交卷</div>':'<div class="muted">交卷完成 · 本场已判分</div>')
+   +'<div class="score">'+s.score+'<span style="font-size:20px;color:#6d7b77">/'+s.full+'</span></div>'
+   +'<div class="verdict '+(s.pass?'pass':'fail')+'">'+(s.pass?'合 格':'未合格')+'（合格线 '+CFG.passScore+' 分）</div></div>'
+   +'<div class="stat">'
+   +'<div><b>'+s.qs.filter(function(x,k){return judge(x)}).length+'</b><span class="muted">答对</span></div>'
+   +'<div><b>'+(s.qs.length-s.qs.filter(function(x){return judge(x)}).length)+'</b><span class="muted">答错/未答</span></div>'
+   +'<div><b>'+fmt(Math.max(0,s.submitTime-s.start))+'</b><span class="muted">用时</span></div>'
+   +'</div><div class="muted center">本卷编号 '+esc(s.id)+'</div></div>';
+  if(!CFG.showResult){
+    h+='<div class="card center"><div class="warnbox">本场设置为不公布答案解析</div>'
+     +'<button class="btn" id="again">再来一局（重新随机抽题）</button></div>';
+    $('#app').innerHTML=h;$('#again').onclick=function(){newExam()};return;
+  }
+  h+='<div class="card"><h2>逐题解析</h2><div class="chips" style="margin-bottom:12px">'
+   +'<span class="chip on" id="f-all">全部</span><span class="chip" id="f-wrong">只看错题</span></div><div id="list">';
+  s.qs.forEach(function(x,k){
+    var ok=judge(x),qa=x.q.a.slice().sort().join(','),ua=x.ans.slice().sort().join(',');
+    var tn={single:'单选',multi:'多选',tf:'判断'}[x.t];
+    h+='<div class="qa'+(ok?'':' wrong')+'" data-ok="'+ok+'" style="padding:12px 0;border-top:1px solid #eef1f0">'
+     +'<div style="font-size:15px"><b>'+(k+1)+'.</b> '
+     +'<span class="tag'+(x.t==='multi'?' m':(x.t==='tf'?' t':''))+'">'+tn+'</span>'
+     +(ok?'<span class="muted" style="color:#2f7d6e">✔ 正确</span>'
+         :'<span class="muted" style="color:#d9534f">✘ 错</span>')
+     +' '+esc(x.q.s)+'</div>'
+     +'<div class="muted" style="margin-top:6px">正确答案：<b style="color:#2f7d6e">'+fmtAns(x)+'</b>'
+     +(ua?'　你的作答：<b style="color:'+(ok?'#2f7d6e':'#d9534f')+'">'+fmtAns({t:x.t,ans:x.ans,q:{a:x.t==='tf'?[0,1]:x.q.o.map(function(_,i){return i})}})+'</b>':'　你未作答')
+     +'</div>'
+     +'<div class="ana'+(ok?'':' wrong')+'">'+esc((x.q.e||'').replace(/^[：:]\s*/,''))+'</div></div>';
+  });
+  h+='</div></div>';
+  var hs=loadHistory();
+  if(hs.length>1){
+    var p=hs.filter(function(r){return r.pass}).length;
+    h+='<div class="card"><h2>本机练习记录</h2><div class="muted">共 '+hs.length+' 场，合格 '+p+' 场，通过率 '+Math.round(p/hs.length*100)+'%</div>'
+     +'<div class="muted" style="margin-top:6px">'+hs.slice(-8).reverse().map(function(r){
+        return new Date(r.t).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})+'　'+r.score+'/'+r.full+(r.pass?' ✔':' ✘')}).join('<br>')+'</div></div>';
+  }
+  h+='<div class="card"><button class="btn" id="again">再来一局（重新随机抽题）</button>'
+   +'<button class="btn ghost" id="home">返回首页</button>'
+   +'<button class="btn gray" id="admin2">生成二维码让其他人也考</button></div>';
+  $('#app').innerHTML=h;
+  $('#again').onclick=function(){newExam()};
+  if($('#home'))$('#home').onclick=function(){STATE=null;clearDraft();home()};
+  if($('#admin2'))$('#admin2').onclick=function(){admin()};
+  $('#f-wrong').onclick=function(){$('#f-wrong').classList.add('on');$('#f-all').classList.remove('on');
+    Array.prototype.forEach.call((typeof document!=='undefined'&&document.querySelectorAll?document.querySelectorAll('.qa'):[]),function(e){e.style.display=e.dataset.ok==='false'?'':'none'})};
+  $('#f-all').onclick=function(){$('#f-all').classList.add('on');$('#f-wrong').classList.remove('on');
+    Array.prototype.forEach.call((typeof document!=='undefined'&&document.querySelectorAll?document.querySelectorAll('.qa'):[]),function(e){e.style.display=''})};
+}
+function clearDraft(){try{localStorage.removeItem('ty_exam')}catch(e){}}
+function fmtAns(x){
+  if(x.t==='tf')return ['正确','错误'][x.q.a[0]];
+  return x.q.a.slice().sort(function(a,b){return a-b}).map(function(i){return 'ABCD'[i]}).join('');
+}
+function onHide(){
+  if(STATE&&!STATE.submitted&&document.querySelector('#tm')){
+    STATE.voided=true;clearDraft();
+  }
+}
+document.addEventListener('visibilitychange',function(){if(document.hidden)onHide()});
+
+/* ---------- 组织者：生成考试二维码 ---------- */
+function admin(){
+  var url=location.href.split('#')[0];
+  var h='<div class="card"><h1>现场考试二维码</h1>'
+   +'<div class="muted">考生扫码 → 现场随机抽题 → 自动判分。二维码就是这个页面的地址，永久有效、不花钱。</div>'
+   +'<div class="qr" id="qr"></div>'
+   +'<div class="center mono">'+esc(url)+'</div>'
+   +'<button class="btn" id="copy">复制考试链接</button>'
+   +'<button class="btn ghost" id="dl">下载二维码图片</button>'
+   +'<button class="btn gray" id="back">返回</button></div>'
+   +'<div class="card"><h2>用法建议</h2><ul class="tips">'
+   +'<li>投屏或打印这张码贴在考场，学员微信扫码即考，无需注册、无需账号。</li>'
+   +'<li>想分场考试、防止相互抄到同一套卷：把配置里的 <b>pool</b> 改成 A / B / C / D，每个场次一个链接一张码，四组题目互不重叠。</li>'
+   +'<li>本页为匿名模式：成绩只存在考生自己手机上，组织者不汇总。若需导出全员成绩表，需要加一个后端收分（可另行提供）。</li>'
+   +'<li>同一个码可反复扫、反复考，每次题目都不同。</li>'
+   +'</ul></div>';
+  $('#app').innerHTML=h;
+  $('#back').onclick=function(){STATE?render():(clearDraft(),home())};
+  $('#copy').onclick=function(){
+    if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){$('#copy').textContent='已复制 ✓'})}
+    else{var t=document.createElement('textarea');t.value=url;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();$('#copy').textContent='已复制 ✓'}
+  };
+  makeQR(url,function(dataUrl){
+    var img=new Image();img.src=dataUrl;img.onload=function(){
+      var c=document.createElement('canvas');c.width=img.width+40;c.height=img.height+80;
+      var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);
+      x.drawImage(img,20,20);
+      x.fillStyle='#1f2a28';x.font='bold 20px sans-serif';x.textAlign='center';
+      x.fillText(CFG.title,c.width/2,img.height+45);
+      x.font='14px sans-serif';x.fillStyle='#6d7b77';x.fillText('扫码即考 · 随机抽题',c.width/2,img.height+66);
+      var out=c.toDataURL('image/png');
+      $('#qr').innerHTML='<img src="'+out+'">';
+      var a=$('#dl');if(a)a.onclick=function(){
+        var l=document.createElement('a');l.download='托育考核考试二维码.png';l.href=out;l.click()};
+    };
+  });
+}
+function makeQR(text,cb){
+  function fail(){
+    $('#qr').innerHTML='<div class="warnbox">二维码组件未能加载（可检查 qrcode.min.js 是否与本页在同一目录）。<br>也可以手动复制下面链接，用任意二维码工具生成：<br><span class="mono">'+esc(text)+'</span></div>';
+  }
+  function draw(){
+    try{
+      var qr=window.qrcode(0,'M');qr.addData(text,'Byte');qr.make();
+      var n=qr.getModuleCount(),max=Math.min(260,(window.screen&&screen.width?screen.width:360)-80);
+      var cell=Math.max(2,Math.floor(max/n)),size=cell*n;
+      var c=document.createElement('canvas');c.width=c.height=size;
+      var x=c.getContext('2d');if(!x)return fail();
+      x.fillStyle='#fff';x.fillRect(0,0,size,size);x.fillStyle='#000';
+      for(var r=0;r<n;r++)for(var k=0;k<n;k++)if(qr.isDark(r,k))x.fillRect(k*cell,r*cell,cell,cell);
+      cb(c.toDataURL('image/png'));
+    }catch(e){fail()}
+  }
+  if(window.qrcode){draw();return}
+  var sc=document.createElement('script');
+  sc.src='./qrcode.min.js';sc.onload=draw;sc.onerror=fail;
+  document.head.appendChild(sc);
+}
+
+/* ---------- 启动 ---------- */
+fetch('questions.json').then(function(r){return r.json()}).then(function(b){
+  BANK=b;home(false);
+}).catch(function(e){
+  $('#app').innerHTML='<div class="card"><h1>题库加载失败</h1><div class="muted">请在联网状态下打开本页，或把本页与 bank.json 一起部署到同一目录后用 http 访问（不能直接双击 file:// 打开）。</div><div class="mono" style="margin-top:10px">'+esc(String(e))+'</div></div>';
+});
+</script>
+</body>
+</html>
