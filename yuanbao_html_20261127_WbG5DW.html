@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>托育服务人员培训考核</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#222;line-height:1.6}
+#app{max-width:680px;margin:0 auto;padding:12px}
+.card{background:#fff;border-radius:12px;padding:18px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.top{position:sticky;top:0;z-index:10;background:#fff;border-radius:12px;padding:12px 18px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.meta{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:#666;margin-bottom:8px}
+.timer{font-weight:700;color:#d9534f;font-size:16px}
+.bar{height:6px;background:#eee;border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#4caf50,#81c784);transition:width .3s}
+.qnum{font-size:13px;color:#888;margin-bottom:6px}
+.stem{font-size:17px;font-weight:600;margin-bottom:14px;line-height:1.7}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;margin-bottom:8px;border:2px solid #e0e0e0;border-radius:10px;cursor:pointer;transition:all .15s}
+.opt:hover{border-color:#bbb;background:#fafafa}
+.opt.sel{border-color:#2196f3;background:#e3f2fd}
+.opt.correct{border-color:#28a745!important;background:#d4edda!important}
+.opt.correct .k{background:#28a745!important;color:#fff!important}
+.opt.wrong{border-color:#dc3545!important;background:#f8d7da!important}
+.opt.wrong .k{background:#dc3545!important;color:#fff!important}
+.opt.disabled{pointer-events:none}
+.k{width:28px;height:28px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.v{flex:1;font-size:15px}
+.btn{display:block;width:100%;padding:12px;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;margin-top:10px;background:#2196f3;color:#fff}
+.btn.gray{background:#eee;color:#555}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.muted{font-size:13px;color:#999}
+.feedback{margin-top:14px;padding:14px;border-radius:10px;font-size:15px}
+.feedback.right{background:#d4edda;border:1px solid #28a745}
+.feedback.wrong{background:#f8d7da;border:1px solid #dc3545}
+.feedback .answer{font-weight:700;color:#d9534f;margin-bottom:6px}
+.feedback .explanation{color:#555;margin-top:6px}
+.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-top:8px}
+.gd{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:12px;border-radius:6px;background:#eee;cursor:pointer}
+.gd.done{background:#d4edda;color:#155724}
+.gd.cur{border:2px solid #2196f3}
+.nav{display:flex;gap:10px;margin-bottom:20px}
+.result-score{text-align:center;font-size:48px;font-weight:700;margin:20px 0}
+.result-pass{text-align:center;font-size:20px;font-weight:600;color:#28a745;margin-bottom:20px}
+.result-fail{text-align:center;font-size:20px;font-weight:600;color:#dc3545;margin-bottom:20px}
+.detail-item{padding:10px 0;border-bottom:1px solid #eee;font-size:14px}
+.detail-item:last-child{border-bottom:none}
+.detail-q{font-weight:600;margin-bottom:4px}
+.detail-a{color:#d9534f}
+.detail-e{color:#888;font-size:13px;margin-top:4px}
+.setup-card{text-align:center;padding:30px}
+.setup-card h2{margin-bottom:20px}
+.setup-card label{display:block;margin:12px 0 4px;font-size:14px;color:#555;text-align:left}
+.setup-card select,.setup-card input{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:15px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ===== 配置 =====
+var CFG={durationMin:60,passScore:80,counts:{single:70,multi:20,tf:10}};
+
+// ===== 状态 =====
+var STATE=null;
+var BANK={single:[],multi:[],tf:[]};
+var LOADED=false;
+
+// ===== DOM =====
+var $=function(s){return document.querySelector(s)};
+
+// ===== 工具 =====
+function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function pick(arr,n){return shuffle(arr.slice()).slice(0,n)}
+function fmtTime(ms){var s=Math.max(0,Math.floor(ms/1000));return Math.floor(s/60)+'分'+(s%60<10?'0':'')+(s%60)+'秒'}
+function fmtAns(q){if(q.t==='tf')return q.q.a[0]===0?'正确':'错误';return q.q.a.slice().sort(function(a,b){return a-b}).map(function(i){return 'ABCD'[i]}).join('')}
+function judge(q){if(!q.ans.length)return false;if(q.t==='tf')return q.ans[0]===q.q.a[0];if(q.ans.length!==q.q.a.length)return false;var s=q.ans.slice().sort();var a=q.q.a.slice().sort();for(var i=0;i<s.length;i++)if(s[i]!==a[i])return false;return true}
+
+// ===== 加载题库 =====
+function loadBank(cb){
+  fetch('questions.json').then(function(r){return r.json()}).then(function(d){
+    BANK=d;BANK.single=BANK.single||[];BANK.multi=BANK.multi||[];BANK.tf=BANK.tf||[];
+    LOADED=true;cb();
+  }).catch(function(){alert('题库加载失败，请检查 questions.json 是否存在')})
+}
+
+// ===== 新建考试 =====
+function newExam(){
+  var single=pick(BANK.single,CFG.counts.single).map(function(q){return{t:'single',q:q,ans:[],revealed:false}});
+  var multi=pick(BANK.multi,CFG.counts.multi).map(function(q){return{t:'multi',q:q,ans:[],revealed:false}});
+  var tf=pick(BANK.tf,CFG.counts.tf).map(function(q){return{t:'tf',q:q,ans:[],revealed:false}});
+  STATE={qs:single.concat(multi,tf),i:0,start:Date.now(),ends:Date.now()+CFG.durationMin*60000,done:false};
+  shuffle(STATE.qs);
+  render();
+}
+
+// ===== 渲染 =====
+function render(){
+  if(!LOADED){$('#app').innerHTML='<div class="card"><p class="muted">加载中...</p></div>';return}
+  if(!STATE){showSetup();return}
+  if(STATE.done){showResult();return}
+
+  var q=STATE.qs[STATE.i];
+  var left=STATE.ends-Date.now();
+  if(left<=0){STATE.done=true;render();return}
+
+  var doneN=STATE.qs.filter(function(x){return x.revealed}).length;
+  var total=STATE.qs.length;
+
+  var h='<div class="top"><div class="meta">'
+    +'<span>第 '+(STATE.i+1)+' / '+total+' 题</span>'
+    +'<span class="timer">'+fmtTime(left)+'</span>'
+    +'<span>已答 '+doneN+'</span></div>'
+    +'<div class="bar"><i style="width:'+(doneN/total*100)+'%"></i></div></div>';
+
+  h+='<div class="card">';
+  h+='<div class="qnum">'+esc(q.q.c||'')+' · '+({single:'单选题',multi:'多选题',tf:'判断题'}[q.t])+'</div>';
+  h+='<div class="stem">'+esc(q.q.s)+'</div>';
+
+  var opts=q.t==='tf'?['正确','错误']:q.q.o;
+  opts.forEach(function(o,k){
+    var on=q.ans.indexOf(k)>=0;
+    var cls='opt'+(on?' sel':'');
+    if(q.revealed){
+      cls+=' disabled';
+      if(q.q.a.indexOf(k)>=0)cls+=' correct';
+      else if(on)cls+=' wrong';
+    }
+    h+='<div class="'+cls+'" data-k="'+k+'"><div class="k">'+(q.t==='tf'?(k===0?'T':'F'):'ABCD'[k])+'</div><div class="v">'+esc(o)+'</div></div>';
+  });
+
+  if(q.t==='multi'&&!q.revealed)h+='<div class="muted" style="margin-top:8px">本题为多选，至少选 2 项</div>';
+
+  // 揭晓反馈
+  if(q.revealed){
+    var ok=judge(q);
+    h+='<div class="feedback '+(ok?'right':'wrong')+'">';
+    if(ok){
+      h+='<b style="color:#155724">✔ 回答正确</b>';
+    }else{
+      h+='<div class="answer">✘ 回答错误，正确答案是：'+fmtAns(q)+'</div>';
+    }
+    h+='<div class="explanation">解析：'+(q.q.e||'暂无解析')+'</div></div>';
+    h+='<button class="btn" id="nextq">'+(STATE.i===total-1?'查看成绩':'下一题')+'</button>';
+  }else{
+    if(q.t==='multi'){
+      h+='<button class="btn" id="confirm">确认作答</button>';
+    }
+  }
+
+  h+='</div>';
+
+  // 答题卡
+  h+='<div class="card"><div class="muted" style="margin-bottom:8px">答题卡（点击跳转）</div><div class="grid" id="gd">';
+  STATE.qs.forEach(function(x,k){h+='<div class="gd'+(x.revealed?' done':'')+(k===STATE.i?' cur':'')+'" data-j="'+k+'">'+(k+1)+'</div>'});
+  h+='</div></div>';
+
+  // 导航
+  h+='<div class="nav"><button class="btn gray" id="prev" '+(STATE.i===0?'disabled':'')+'>上一题</button>';
+  if(STATE.i===total-1){
+    h+='<button class="btn" id="fin">交卷</button>';
+  }else{
+    h+='<button class="btn" id="nextnav">下一题</button>';
+  }
+  h+='</div>';
+
+  $('#app').innerHTML=h;
+  bindEvents();
+  startTimer(left);
+}
+
+var timerInt=null;
+function startTimer(left){
+  if(timerInt)clearInterval(timerInt);
+  timerInt=setInterval(function(){
+    var l=STATE.ends-Date.now();
+    var el=$('.timer');
+    if(el)el.textContent=fmtTime(l);
+    if(l<=0){clearInterval(timerInt);STATE.done=true;render()}
+  },1000);
+}
+
+function bindEvents(){
+  var q=STATE.qs[STATE.i];
+
+  // 选项点击
+  document.querySelectorAll('.opt').forEach(function(el){
+    el.onclick=function(){
+      if(q.revealed)return;
+      var k=+el.dataset.k;
+      if(q.t==='multi'){
+        var p=q.ans.indexOf(k);
+        if(p>=0)q.ans.splice(p,1);else q.ans.push(k);
+        render();
+      }else{
+        q.ans=[k];
+        q.revealed=true;
+        render();
+      }
+    };
+  });
+
+  // 多选确认
+  if($('#confirm'))$('#confirm').onclick=function(){
+    if(!q.ans.length){alert('请至少选择一项');return}
+    q.revealed=true;render();
+  };
+
+  // 下一题
+  if($('#nextq'))$('#nextq').onclick=function(){
+    if(STATE.i<STATE.qs.length-1){STATE.i++;render()}
+    else{STATE.done=true;render()}
+  };
+
+  // 答题卡跳转
+  document.querySelectorAll('.gd').forEach(function(el){el.onclick=function(){STATE.i=+el.dataset.j;render()}});
+
+  // 上下题
+  if($('#prev'))$('#prev').onclick=function(){if(STATE.i>0){STATE.i--;render()}};
+  if($('#nextnav'))$('#nextnav').onclick=function(){if(STATE.i<STATE.qs.length-1){STATE.i++;render()}};
+
+  // 交卷
+  if($('#fin'))$('#fin').onclick=function(){
+    var unrevealed=STATE.qs.filter(function(x){return!x.revealed}).length;
+    if(unrevealed&&!confirm('还有 '+unrevealed+' 题未作答，确定交卷？'))return;
+    STATE.done=true;render();
+  };
+}
+
+// ===== 成绩页 =====
+function showResult(){
+  clearInterval(timerInt);
+  var correct=0;var total=STATE.qs.length;
+  STATE.qs.forEach(function(q){if(judge(q))correct++});
+  var pass=correct>=CFG.passScore;
+
+  var h='<div class="card">';
+  h+='<div class="result-score" style="color:'+(pass?'#28a745':'#dc3545')+'">'+correct+'</div>';
+  h+='<div class="'+(pass?'result-pass':'result-fail')+'">'+(pass?'🎉 合格':'❌ 不合格')+'（'+correct+'/'+total+'，合格线'+CFG.passScore+'分）</div>';
+  h+='</div>';
+
+  h+='<div class="card"><div class="muted" style="margin-bottom:10px">答题详情</div>';
+  STATE.qs.forEach(function(q,k){
+    var ok=judge(q);
+    h+='<div class="detail-item">';
+    h+='<div class="detail-q">第'+(k+1)+'题 '+(ok?'<span style="color:#28a745">✔</span>':'<span style="color:#dc3545">✘</span>')+' '+esc(q.q.s)+'</div>';
+    if(!ok){
+      h+='<div class="detail-a">正确答案：'+fmtAns(q)+'</div>';
+    }
+    if(q.q.e)h+='<div class="detail-e">解析：'+esc(q.q.e)+'</div>';
+    h+='</div>';
+  });
+  h+='</div>';
+
+  h+='<button class="btn" onclick="location.reload()">重新考试</button>';
+  $('#app').innerHTML=h;
+}
+
+// ===== 设置页 =====
+function showSetup(){
+  var h='<div class="card setup-card">';
+  h+='<h2>托育服务人员培训考核</h2>';
+  h+='<label>考试时长（分钟）</label><input type="number" id="dur" value="'+CFG.durationMin+'">';
+  h+='<label>合格分数线</label><input type="number" id="pass" value="'+CFG.passScore+'">';
+  h+='<label>单选题数量</label><input type="number" id="cs" value="'+CFG.counts.single+'">';
+  h+='<label>多选题数量</label><input type="number" id="cm" value="'+CFG.counts.multi+'">';
+  h+='<label>判断题数量</label><input type="number" id="ct" value="'+CFG.counts.tf+'">';
+  h+='<button class="btn" id="start">开始考试</button>';
+  h+='</div>';
+  $('#app').innerHTML=h;
+  $('#start').onclick=function(){
+    CFG.durationMin=+($('#dur').value)||60;
+    CFG.passScore=+($('#pass').value)||80;
+    CFG.counts.single=+($('#cs').value)||70;
+    CFG.counts.multi=+($('#cm').value)||20;
+    CFG.counts.tf=+($('#ct').value)||10;
+    newExam();
+  };
+}
+
+// ===== 启动 =====
+loadBank(function(){render()});
+</script>
+</body>
+</html>
